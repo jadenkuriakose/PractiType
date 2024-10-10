@@ -247,11 +247,7 @@ function App() {
     <div className="App">
       <header>
         <h1>PractiType</h1>
-        <p>{dateTime}</p>
-        <button>
-          Choose Theme Color
-          <input type="color" class = "choose" value={themeColor} onChange={handleColorChange} />
-        </button>
+        <h3>{dateTime}</h3>
       </header>
       <main>
         <section>
