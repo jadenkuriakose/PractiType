@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import particlesJS from 'particles.js';
+import particlesConfig from './particlesConfig';
 import './App.css';
 
 
@@ -130,32 +132,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--bg-color', themeColor);
-    document.documentElement.style.setProperty('--text-color', getContrastColor(themeColor));
-    document.documentElement.style.setProperty('--section-bg-color', adjustBrightness(themeColor, -30));
-  }, [themeColor]);
-
-  const getContrastColor = (hex) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return (r * 0.299 + g * 0.587 + b * 0.114) > 186 ? '#000000' : '#ffffff';
-  };
-
-  const adjustBrightness = (hex, percent) => {
-    const num = parseInt(hex.slice(1), 16);
-    let r = (num >> 16) + percent;
-    let g = ((num >> 8) & 0x00FF) + percent;
-    let b = (num & 0x0000FF) + percent;
-    r = Math.min(255, Math.max(0, r));
-    g = Math.min(255, Math.max(0, g));
-    b = Math.min(255, Math.max(0, b));
-    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
-  };
-
-  const handleColorChange = (event) => {
-    setThemeColor(event.target.value);
-  };
+    if (window.particlesJS) {
+      window.particlesJS('particles-js', particlesConfig); 
+    }
+  }, []);
 
   const startTypingTest = () => {
     const randomIndex = Math.floor(Math.random() * typingTexts.length);
@@ -164,7 +144,6 @@ function App() {
     setIsTyping(true);
     setStartTime(null);
     setWpm(null);
-    setEditIndex()
   };
 
   const handleTypingChange = (event) => {
@@ -181,21 +160,11 @@ function App() {
     }
   };
 
-  const handleDone = () => {
-    setIsTyping(false);
-    const timeTaken = (Date.now() - startTime) / 1000;
-    const wordCount = currentText.split(' ').length;
-    const wpm = Math.round((wordCount / timeTaken) * 60);
-    setWpm(wpm);
-    setText('');
-  };
-
-
   const addGoal = (e) => {
     e.preventDefault();
     if (newGoal.trim()) {
       if (editIndex !== null) {
-        const updatedGoals = goals.map((goal, index) => 
+        const updatedGoals = goals.map((goal, index) =>
           index === editIndex ? newGoal : goal
         );
         setGoals(updatedGoals);
@@ -210,7 +179,7 @@ function App() {
   const editGoals = (index) => {
     setNewGoal(goals[index]);
     setEditIndex(index);
- };
+  };
 
   const deleteGoals = (index) => {
     const updatedGoals = goals.filter((_, i) => i !== index);
@@ -221,8 +190,8 @@ function App() {
     e.preventDefault();
     if (newKey.trim()) {
       if (editKeyIndex !== null) {
-        const updatedKeys = keys.map((key, index) => 
-          index === editKeyIndex ? newKey : keys
+        const updatedKeys = keys.map((key, index) =>
+          index === editKeyIndex ? newKey : key
         );
         setKey(updatedKeys);
         setEditKeyIndex(null);
@@ -236,7 +205,7 @@ function App() {
   const editKeys = (index) => {
     setNewKey(keys[index]);
     setEditKeyIndex(index);
- };
+  };
 
   const deleteKeys = (index) => {
     const updatedKeys = keys.filter((_, i) => i !== index);
@@ -245,6 +214,7 @@ function App() {
 
   return (
     <div className="App">
+      <div id="particles-js" />
       <header>
         <h1>PractiType</h1>
         <h3>{dateTime}</h3>
@@ -262,7 +232,7 @@ function App() {
                 autoFocus
                 placeholder="Start typing..."
               />
-              <button onClick={handleDone}>Done</button>
+              <button onClick={() => setIsTyping(false)}>Done</button>
             </>
           ) : (
             <button onClick={startTypingTest}>Start Typing Test</button>
@@ -278,25 +248,20 @@ function App() {
             onChange={(e) => setNewGoal(e.target.value)}
             placeholder="Set a new goal"
           />
-          <button type="submit" onClick = {addGoal}>
-          {editIndex !== null ? 'Update' : 'Add Goal'} 
+          <button onClick={addGoal}>
+            {editIndex !== null ? 'Update' : 'Add Goal'}
           </button>
-
           <ul className="goals-list">
             {goals.map((goal, index) => (
-             <li key={index} className="goal">
-              <p>{goal}</p>
-              <button onClick={() => editGoals(index)} aria-label={`Edit goal ${index + 1}`}>
-               Edit
-              </button>
-              <button onClick={() => deleteGoals(index)} aria-label={`Delete goal ${index + 1}`}>
-              Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-
+              <li key={index} className="goal">
+                <p>{goal}</p>
+                <button onClick={() => editGoals(index)}>Edit</button>
+                <button onClick={() => deleteGoals(index)}>Delete</button>
+              </li>
+            ))}
+          </ul>
         </section>
+
         <section>
           <h2>Key Understanding</h2>
           <input
@@ -305,26 +270,21 @@ function App() {
             onChange={(e) => setNewKey(e.target.value)}
             placeholder="Add a Key"
           />
-          <button type="submit" onClick = {addKeys}>
-          {editIndex !== null ? 'Update' : 'Add key'} 
+          <button onClick={addKeys}>
+            {editKeyIndex !== null ? 'Update' : 'Add Key'}
           </button>
-
           <ul className="key-list">
-            {keys.map((keys, index) => (
-             <li key={index} className="goal">
-              <p>{keys}</p>
-              <button onClick={() => editKeys(index)} aria-label={`Edit key ${index + 1}`}>
-               Edit
-              </button>
-              <button onClick={() => deleteKeys(index)} aria-label={`Delete key ${index + 1}`}>
-              Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-  </section>
-  </main>
-  </div>
+            {keys.map((key, index) => (
+              <li key={index} className="goal">
+                <p>{key}</p>
+                <button onClick={() => editKeys(index)}>Edit</button>
+                <button onClick={() => deleteKeys(index)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </main>
+    </div>
   );
 }
 
